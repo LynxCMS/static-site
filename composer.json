@@ -1,0 +1,21 @@
+{
+    "name": "lynxcms/static-site",
+    "description": "Exports a Lynx CMS site as static files: every published page in every language, the public files, a 404 page and redirects, to host without PHP.",
+    "license": "MIT",
+    "require": {
+        "php": "^8.5",
+        "lynxcms/core": "self.version"
+    },
+    "suggest": {
+        "ext-zip": "Writes the export as a zip file.",
+        "lynxcms/admin": "Adds the static export screen to the Livewire admin."
+    },
+    "autoload": {
+        "psr-4": { "LynxCms\\StaticSite\\": "src/" }
+    },
+    "extra": {
+        "laravel": {
+            "providers": ["LynxCms\\StaticSite\\StaticSiteServiceProvider"]
+        }
+    }
+}
