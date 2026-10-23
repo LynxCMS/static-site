@@ -9,7 +9,7 @@ use Livewire\Livewire;
 use LynxCms\Admin\Admin;
 use LynxCms\Admin\AdminAccess;
 use LynxCms\Admin\Navigation;
-use LynxCms\Core\Support\Value;
+use LynxCms\StaticSite\Admin\Http\DownloadStaticSite;
 use LynxCms\StaticSite\Admin\Livewire\StaticExport;
 
 /**
@@ -28,14 +28,9 @@ final class AdminIntegration
         $canExport = fn (): bool => app(AdminAccess::class)->allows('static.export');
         app(Navigation::class)->add('Static export', 'lynx.admin.static', order: self::NAVIGATION_ORDER, visible: $canExport, icon: 'package', group: Navigation::SETTINGS);
 
-        Admin::routes(function () use ($canExport): void {
-            Route::get('static', fn () => $canExport() ? view('lynx-static::admin.index') : abort(403))->name('static');
-            Route::get('static/download', function () use ($canExport) {
-                $zip = Value::string(config('lynx-static.path')).'.zip';
-                abort_unless($canExport() && is_file($zip), 404);
-
-                return response()->download($zip, 'static-site.zip');
-            })->name('static.download');
+        Admin::routes(function (): void {
+            Admin::screen('static', 'lynx-static::admin.index', 'static.export')->name('static');
+            Route::get('static/download', DownloadStaticSite::class)->name('static.download');
         });
     }
 }
