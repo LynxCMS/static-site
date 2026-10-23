@@ -10,7 +10,7 @@
 
     <section aria-labelledby="static-export" class="bg-card grid gap-4 rounded-xl border p-5">
         <h2 id="static-export" class="font-medium">Export</h2>
-        <p class="text-muted-foreground text-sm">Every published page in every language, the public files, a 404 page, the sitemap and redirects for old addresses. Forms and Livewire need PHP and will not work on the static site.</p>
+        <p class="text-muted-foreground text-sm">Every published page{{ lynx()->languages->isMultilingual() ? ' in every language' : '' }}, the public files, a 404 page, the sitemap and redirects for old addresses. Forms and Livewire need PHP and will not work on the static site.</p>
         <div class="flex flex-wrap items-center gap-2">
             <x-lynx-admin::ui.button type="button" wire:click="export" wire:loading.attr="disabled">Export</x-lynx-admin::ui.button>
             @if ($canZip)
