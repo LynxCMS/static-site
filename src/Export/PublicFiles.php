@@ -13,13 +13,14 @@ use SplFileInfo;
 
 /**
  * Copies public/ into the export (built assets, media and its image variations, icons), following
- * links such as public/storage, and leaving out what only works with PHP (lynx-static.exclude).
+ * links such as public/storage, and leaving out what only works with PHP (lynx-static.exclude)
+ * and the media of pages a guest could not open (MediaFolders).
  *
  * @internal
  */
 final readonly class PublicFiles
 {
-    public function __construct(private Filesystem $files) {}
+    public function __construct(private Filesystem $files, private MediaFolders $media) {}
 
     /** @return int files copied */
     public function copyTo(string $destination): int
@@ -42,7 +43,7 @@ final readonly class PublicFiles
 
             $relative = substr($item->getPathname(), strlen($source) + 1);
 
-            if (! $this->isExcluded($relative)) {
+            if (! $this->isExcluded($relative) && $this->media->allows($relative)) {
                 $this->files->ensureDirectoryExists(dirname($destination.'/'.$relative));
                 $this->files->copy($item->getPathname(), $destination.'/'.$relative);
                 $copied++;
