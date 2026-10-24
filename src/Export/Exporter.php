@@ -16,7 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Builds a static copy of the site in a folder (ADR-0069): every page a visitor can open, in every
  * language, the extra addresses in lynx-static.paths, a 404.html, the public files and redirects.
- * Everything renders as if the site were served at the static address.
+ * Everything is listed and rendered as a guest would get it, at the static address, also when an
+ * editor starts the export from the admin.
  *
  * @internal
  */
@@ -46,7 +47,7 @@ final readonly class Exporter
         $report = new ExportReport;
         $baseUrl = rtrim($baseUrl, '/');
 
-        $this->address->run($baseUrl, function () use ($folder, $baseUrl, $report): void {
+        $this->visitor->asGuest(fn () => $this->address->run($baseUrl, function () use ($folder, $baseUrl, $report): void {
             $taken = $this->pages($folder, $baseUrl, $report);
             $this->extras($folder, $baseUrl, $report);
             $this->notFound($folder, $baseUrl, $report);
@@ -54,7 +55,7 @@ final readonly class Exporter
             $report->files = $this->publicFiles->copyTo($folder);
             $report->files += $this->assets->write($folder, $baseUrl);
             $report->redirects = $this->redirects->write($folder, $baseUrl, $taken);
-        });
+        }));
 
         return $report;
     }
@@ -62,12 +63,14 @@ final readonly class Exporter
     /** How many pages an export would write, without rendering them. */
     public function count(): int
     {
-        $count = 0;
-        $this->eachPage(function (Page $page) use (&$count): void {
-            $count += count($this->urls->of($page));
-        });
+        return $this->visitor->asGuest(function (): int {
+            $count = 0;
+            $this->eachPage(function (Page $page) use (&$count): void {
+                $count += count($this->urls->of($page));
+            });
 
-        return $count;
+            return $count;
+        });
     }
 
     /** @return array<string, true> local URLs written */
