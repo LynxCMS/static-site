@@ -6,6 +6,7 @@ namespace LynxCms\StaticSite\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Validation\ValidationException;
+use LynxCms\Core\Console\Concerns\TerminalFeedback;
 use LynxCms\Core\Support\Value;
 use LynxCms\StaticSite\Actions\ExportStaticSite;
 use LynxCms\StaticSite\Export\ExportReport;
@@ -16,6 +17,8 @@ use Override;
  */
 final class StaticExportCommand extends Command
 {
+    use TerminalFeedback;
+
     #[Override]
     protected $signature = 'lynx:static
         {--path= : Folder to export to (default lynx-static.path)}
@@ -36,9 +39,9 @@ final class StaticExportCommand extends Command
         }
 
         try {
-            $report = lynx()->run(ExportStaticSite::class, ['zip' => (bool) $this->option('zip')])->valueAs(ExportReport::class);
+            $report = $this->working('Exporting the site...', fn (): ExportReport => lynx()->run(ExportStaticSite::class, ['zip' => (bool) $this->option('zip')])->valueAs(ExportReport::class));
         } catch (ValidationException $error) {
-            $this->error(implode(' ', Value::strings($error->validator->errors()->all())));
+            $this->components->error(implode(' ', Value::strings($error->validator->errors()->all())));
 
             return self::FAILURE;
         }
@@ -50,14 +53,14 @@ final class StaticExportCommand extends Command
 
     private function report(ExportReport $report): void
     {
-        $this->info("Exported {$report->pages} pages, {$report->extras} other files, {$report->files} public files and {$report->redirects} redirects to ".Value::string(config('lynx-static.path')).'.');
+        $this->components->info("Exported {$report->pages} pages, {$report->extras} other files, {$report->files} public files and {$report->redirects} redirects to ".Value::string(config('lynx-static.path')).'.');
 
         foreach ($report->skipped as $url => $reason) {
             $this->line("  Left out {$url}: {$reason}");
         }
 
         foreach ($report->warnings as $url => $warnings) {
-            $this->warn("  {$url}: ".implode(', ', $warnings));
+            $this->components->warn("{$url}: ".implode(', ', $warnings));
         }
     }
 }
