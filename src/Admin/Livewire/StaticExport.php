@@ -46,7 +46,7 @@ final class StaticExport extends Component
             return;
         }
 
-        $this->status = "Exported {$report->pages} pages, {$report->files} public files and {$report->redirects} redirects.";
+        $this->status = Value::string(__('lynx-static::admin.exported', ['pages' => $report->pages, 'files' => $report->files, 'redirects' => $report->redirects]));
         $this->warnings = $report->warnings;
     }
 

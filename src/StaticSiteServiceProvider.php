@@ -34,6 +34,7 @@ final class StaticSiteServiceProvider extends ServiceProvider
         $this->app->make(ActionRegistry::class)->register(ExportStaticSite::class);
         $this->app->make(PermissionRegistry::class)->register('static.export', 'Export the site as static files', requires: ['pages.view']);
         Event::listen(StaticSiteBuilt::class, [PublishExport::class, 'handle']);
+        $this->loadTranslationsFrom(self::ROOT.'/lang', 'lynx-static');
         $this->loadViewsFrom(self::ROOT.'/resources/views', 'lynx-static');
 
         if ($this->app->bound(Navigation::class)) {

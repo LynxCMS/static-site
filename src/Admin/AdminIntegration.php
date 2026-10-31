@@ -26,7 +26,7 @@ final class AdminIntegration
     {
         Livewire::component('lynx-static.export', StaticExport::class);
         $canExport = fn (): bool => app(AdminAccess::class)->allows('static.export');
-        app(Navigation::class)->add('Static export', 'lynx.admin.static', order: self::NAVIGATION_ORDER, visible: $canExport, icon: 'package', group: Navigation::SETTINGS);
+        app(Navigation::class)->add('lynx-static::admin.title', 'lynx.admin.static', order: self::NAVIGATION_ORDER, visible: $canExport, icon: 'package', group: Navigation::SETTINGS);
 
         Admin::routes(function (): void {
             Admin::screen('static', 'lynx-static::admin.index', 'static.export')->name('static');
