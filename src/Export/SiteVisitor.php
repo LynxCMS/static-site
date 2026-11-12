@@ -6,9 +6,11 @@ namespace LynxCms\StaticSite\Export;
 
 use Closure;
 use Illuminate\Auth\AuthManager;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Cookie\CookieJar;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
 use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\SessionManager;
 use Illuminate\Session\Store;
@@ -32,7 +34,9 @@ final readonly class SiteVisitor
     private const string BYPASS_COOKIE = 'lynx_bypass';
 
     public function __construct(
+        private Container $container,
         private Kernel $kernel,
+        private Router $router,
         private CookieJar $cookies,
         private PageVisibility $visibility,
         private AuthManager $auth,
@@ -44,9 +48,16 @@ final readonly class SiteVisitor
         // Visits share one process: cookies queued by one visit would go out with the next, and
         // Livewire keeps per request flags (scripts printed) until reset, as Octane does.
         $this->cookies->flushQueuedCookies();
+        // Scoped services (the language, loaded pages, resolved paths) live for one request.
+        $this->container->forgetScopedInstances();
+        // The router keeps each route's controller once built, with the services it was given;
+        // Octane flushes them between requests too.
+        foreach ($this->router->getRoutes()->getRoutes() as $route) {
+            $route->flushController();
+        }
 
-        if (class_exists(LivewireManager::class) && app()->bound(LivewireManager::class)) {
-            app(LivewireManager::class)->flushState();
+        if (class_exists(LivewireManager::class) && $this->container->bound(LivewireManager::class)) {
+            $this->container->make(LivewireManager::class)->flushState();
         }
 
         $request = Request::create($url, cookies: [self::BYPASS_COOKIE => '1']);
