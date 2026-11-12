@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace LynxCms\StaticSite\Admin\Livewire;
 
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use LynxCms\Admin\AdminAccess;
-use LynxCms\Admin\AdminServiceProvider;
 use LynxCms\Core\Support\Value;
 use LynxCms\StaticSite\Actions\ExportStaticSite;
 use LynxCms\StaticSite\Export\ExportReport;
@@ -30,10 +28,9 @@ final class StaticExport extends Component
     /** @var array<string, list<string>> local URL => what needs PHP, from the last export */
     public array $warnings = [];
 
-    public function boot(): void
+    public function boot(AdminAccess $access): void
     {
-        Gate::authorize(AdminServiceProvider::GATE);
-        abort_unless(app(AdminAccess::class)->allows('static.export'), 403);
+        $access->authorizeScreen('static.export');
     }
 
     public function export(bool $zip = false): void
