@@ -18,7 +18,7 @@ use LynxCms\StaticSite\Export\PublishExport;
  * Registers the static site export (ADR-0069): the static.export action (and so its MCP and AI
  * tools), lynx:static, the static.export permission and the admin screen.
  *
- * @api
+ * @internal
  */
 final class StaticSiteServiceProvider extends ServiceProvider
 {

@@ -8,7 +8,7 @@ namespace LynxCms\StaticSite\Export;
  * What an export wrote: pages, other addresses, copied files and redirects, with the pages left
  * out and the pages that need PHP to work fully.
  *
- * @api
+ * @internal
  */
 final class ExportReport
 {

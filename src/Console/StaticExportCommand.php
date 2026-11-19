@@ -14,6 +14,8 @@ use Override;
 
 /**
  * lynx:static: exports the site as static files, with what was written and what needs PHP.
+ *
+ * @internal
  */
 final class StaticExportCommand extends Command
 {

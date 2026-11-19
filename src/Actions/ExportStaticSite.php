@@ -21,6 +21,8 @@ use ZipArchive;
  * Exports the site as static files to lynx-static.path (ADR-0069), to host without PHP. The folder
  * and address come from config, never from input, so callers such as MCP cannot write elsewhere.
  * The export is built beside the folder and replaces it only once the action commits.
+ *
+ * @api
  */
 final class ExportStaticSite extends Action
 {
