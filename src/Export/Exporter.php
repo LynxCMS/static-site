@@ -187,7 +187,7 @@ final readonly class Exporter
     /** Links to the site from its root (lynx-static.relative_links), so the export works on any host. */
     private function forAnyHost(string $html, string $baseUrl): string
     {
-        return Value::bool(config('lynx-static.relative_links'), true) ? (new RootRelativeLinks($baseUrl))->rewrite($html) : $html;
+        return Value::bool(config('lynx-static.relative_links'), true) ? new RootRelativeLinks($baseUrl)->rewrite($html) : $html;
     }
 
     /** Published pages of templates with URLs, found as a visitor finds them. */
