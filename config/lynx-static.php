@@ -7,9 +7,13 @@ return [
     // folder it made itself (it holds a .lynx-static file) or an empty one.
     'path' => env('LYNX_STATIC_PATH', base_path('dist')),
 
-    // The address the static site is served at. Links, canonical tags and the sitemap use it.
-    // Empty uses app.url.
+    // The address the static site is served at. Canonical tags, alternates, meta tags and the
+    // sitemap use it. Empty uses app.url.
     'url' => env('LYNX_STATIC_URL'),
+
+    // Links, scripts, styles and images to the site from its root (/about), so one export works
+    // on any host, a local server too. False keeps the full address everywhere.
+    'relative_links' => env('LYNX_STATIC_RELATIVE_LINKS', true),
 
     // The environment pages render in. Production by default, so an export made on a local or
     // staging install is indexed (lynx-seo blocks robots elsewhere) and shows no debug output.
@@ -21,8 +25,9 @@ return [
     'paths' => ['/sitemap.xml', '/robots.txt'],
 
     // Files and folders in public/ that are not copied, as paths relative to public/ (fnmatch
-    // patterns). PHP entry points and the page cache's own files never work without PHP.
-    'exclude' => ['index.php', 'index-hook.php', '.htaccess', 'hot', 'lynx-cache', 'web.config', '*.gitignore'],
+    // patterns). PHP entry points and the page cache's own files never work without PHP, and
+    // Vite's dev server files point at your machine.
+    'exclude' => ['index.php', 'index-hook.php', '.htaccess', 'hot', 'fonts-manifest.dev.json', 'lynx-cache', 'web.config', '*.gitignore'],
 
     // Old addresses of renamed and moved pages: a _redirects file (Netlify, Cloudflare Pages) and
     // a small HTML page at each old address that sends visitors on (any host, GitHub Pages too).

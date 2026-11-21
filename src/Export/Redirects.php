@@ -9,6 +9,7 @@ use LynxCms\Core\Languages\LanguageRegistry;
 use LynxCms\Core\Pages\Page;
 use LynxCms\Core\Pages\PageUrl;
 use LynxCms\Core\Pages\PathResolver;
+use LynxCms\Core\Support\Value;
 
 /**
  * Old addresses of renamed and moved pages (ADR-0011) for a site without PHP: a _redirects file
@@ -58,24 +59,26 @@ final class Redirects
         if ((bool) config('lynx-static.redirects.pages', true)) {
             foreach ($moves as $from => $to) {
                 $this->files->ensureDirectoryExists(dirname(ExportPaths::fileFor($folder, $from)));
-                $this->files->put(ExportPaths::fileFor($folder, $from), $this->page(rtrim($baseUrl, '/').$to));
+                $this->files->put(ExportPaths::fileFor($folder, $from), $this->page(rtrim($baseUrl, '/'), $to));
             }
         }
 
         return count($moves);
     }
 
-    private function page(string $url): string
+    /** Visitors go on from the root, on any host; the canonical tag names the full address. */
+    private function page(string $baseUrl, string $to): string
     {
-        $url = e($url);
+        $url = e($baseUrl.$to);
+        $target = Value::bool(config('lynx-static.relative_links'), true) ? e($to) : $url;
 
         return <<<HTML
         <!DOCTYPE html>
         <html><head><meta charset="utf-8"><title>Moved</title>
-        <meta http-equiv="refresh" content="0; url={$url}">
+        <meta http-equiv="refresh" content="0; url={$target}">
         <link rel="canonical" href="{$url}">
         <meta name="robots" content="noindex">
-        </head><body><a href="{$url}">{$url}</a></body></html>
+        </head><body><a href="{$target}">{$target}</a></body></html>
 
         HTML;
     }

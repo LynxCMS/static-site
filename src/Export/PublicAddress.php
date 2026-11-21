@@ -6,31 +6,37 @@ namespace LynxCms\StaticSite\Export;
 
 use Closure;
 use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Foundation\Vite;
 use Illuminate\Routing\UrlGenerator;
 use LynxCms\Core\Support\Value;
 
 /**
  * Renders as the public site for the length of an export: at the static address (url(), asset(),
  * canonical tags, and files on disks served from the app's address, such as media on "public"),
- * with the array session driver, and by default as production without debug, so an export made on
+ * with the built assets rather than Vite's dev server, with the array session driver, and by default as production without debug, so an export made on
  * a local or staging install is not marked noindex and its error pages show no debug output.
  *
  * @internal
  */
 final readonly class PublicAddress
 {
-    public function __construct(private UrlGenerator $generator, private FilesystemManager $disks) {}
+    /** A hot file that never exists: pages load the built assets, also while Vite's dev server runs. */
+    private const string NO_HOT_FILE = 'lynx-static-no-hot';
+
+    public function __construct(private UrlGenerator $generator, private FilesystemManager $disks, private Vite $vite) {}
 
     public function run(string $baseUrl, Closure $work): void
     {
         $environment = Value::nullableString(config('lynx-static.environment'));
         $previousEnvironment = app()->environment();
+        $hotFile = $this->vite->hotFile();
         $previous = ['app.url' => config('app.url'), 'app.debug' => config('app.debug'), 'session.driver' => config('session.driver')] + $this->diskUrls();
         // Visits must not leave a session behind each, in the database or on disk.
         config(['app.url' => $baseUrl, 'session.driver' => 'array'] + $this->movedDiskUrls($baseUrl) + ($environment === null ? [] : ['app.debug' => false]));
         $this->forgetDisks();
         $this->generator->forceRootUrl($baseUrl);
         $this->generator->forceScheme((string) parse_url($baseUrl, PHP_URL_SCHEME));
+        $this->vite->useHotFile(storage_path('framework/'.self::NO_HOT_FILE));
 
         if ($environment !== null) {
             app()->instance('env', $environment);
@@ -44,6 +50,7 @@ final readonly class PublicAddress
             $this->forgetDisks();
             $this->generator->forceRootUrl(null);
             $this->generator->forceScheme(null);
+            $this->vite->useHotFile($hotFile);
         }
     }
 

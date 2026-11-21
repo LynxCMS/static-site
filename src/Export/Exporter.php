@@ -102,11 +102,11 @@ final readonly class Exporter
         }
 
         $html = SiteVisitor::body($response);
+        $this->assets->collect($html, $baseUrl);
         $file = ExportPaths::fileFor($folder, $url);
         $this->files->ensureDirectoryExists(dirname($file));
-        $this->files->put($file, $html);
+        $this->files->put($file, $this->forAnyHost($html, $baseUrl));
         $report->pages++;
-        $this->assets->collect($html, $baseUrl);
         $warnings = PageWarnings::of($html, $baseUrl);
 
         if ($warnings !== []) {
@@ -179,9 +179,15 @@ final readonly class Exporter
         $response = $this->visitor->visit($baseUrl.self::MISSING);
 
         if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
-            $this->files->put($folder.'/404.html', SiteVisitor::body($response));
+            $this->files->put($folder.'/404.html', $this->forAnyHost(SiteVisitor::body($response), $baseUrl));
             $report->extras++;
         }
+    }
+
+    /** Links to the site from its root (lynx-static.relative_links), so the export works on any host. */
+    private function forAnyHost(string $html, string $baseUrl): string
+    {
+        return Value::bool(config('lynx-static.relative_links'), true) ? (new RootRelativeLinks($baseUrl))->rewrite($html) : $html;
     }
 
     /** Published pages of templates with URLs, found as a visitor finds them. */
