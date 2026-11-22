@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LynxCms\StaticSite\Admin\Livewire;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use LynxCms\Admin\AdminAccess;
@@ -55,7 +56,7 @@ final class StaticExport extends Component
         return view('lynx-static::admin.livewire.export', [
             'path' => $path,
             'url' => Value::nullableString(config('lynx-static.url')) ?? Value::string(config('app.url')),
-            'exportedAt' => is_file($marker) ? date('Y-m-d H:i', (int) filemtime($marker)) : null,
+            'exportedAt' => is_file($marker) ? Date::createFromTimestamp((int) filemtime($marker), date_default_timezone_get())->isoFormat('lll') : null,
             'hasZip' => is_file($path.'.zip'),
             'canZip' => class_exists(ZipArchive::class),
         ]);
