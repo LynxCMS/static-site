@@ -66,7 +66,7 @@ final readonly class OutputFolder
             || ($this->files->isDirectory($target) && $this->files->isEmptyDirectory($target));
 
         if (! $isOwn) {
-            throw ValidationException::withMessages(['path' => "The folder [{$target}] was not made by a static export, so it is left as it is. Empty it or choose another folder."]);
+            throw ValidationException::withMessages(['path' => Value::string(__('lynx-static::validation.folder', ['folder' => $target]))]);
         }
     }
 }

@@ -60,7 +60,7 @@ final class ExportStaticSite extends Action
         $zip = Value::bool($input->get('zip'));
 
         if ($zip && ! class_exists(ZipArchive::class)) {
-            throw ValidationException::withMessages(['zip' => 'Writing a zip needs the PHP zip extension.']);
+            throw ValidationException::withMessages(['zip' => Value::string(__('lynx-static::validation.zip'))]);
         }
 
         if ($context->dryRun) {
