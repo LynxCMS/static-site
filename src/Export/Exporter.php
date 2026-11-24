@@ -46,7 +46,22 @@ final readonly class Exporter
     {
         $report = new ExportReport;
         $baseUrl = rtrim($baseUrl, '/');
+        // The files are copied right after rendering, so image sizes are made while rendering,
+        // not left to a queue (lynx-media.queue_sizes) the export would not wait for.
+        $queuesSizes = config('lynx-media.queue_sizes');
+        config(['lynx-media.queue_sizes' => false]);
 
+        try {
+            $this->render($folder, $baseUrl, $report);
+        } finally {
+            config(['lynx-media.queue_sizes' => $queuesSizes]);
+        }
+
+        return $report;
+    }
+
+    private function render(string $folder, string $baseUrl, ExportReport $report): void
+    {
         $this->visitor->asGuest(fn () => $this->address->run($baseUrl, function () use ($folder, $baseUrl, $report): void {
             $taken = $this->pages($folder, $baseUrl, $report);
             $this->extras($folder, $baseUrl, $report);
@@ -56,8 +71,6 @@ final readonly class Exporter
             $report->files += $this->assets->write($folder, $baseUrl);
             $report->redirects = $this->redirects->write($folder, $baseUrl, $taken);
         }));
-
-        return $report;
     }
 
     /** How many pages an export would write, without rendering them. */
