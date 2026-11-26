@@ -25,9 +25,9 @@ return [
     'paths' => ['/sitemap.xml', '/robots.txt'],
 
     // Files and folders in public/ that are not copied, as paths relative to public/ (fnmatch
-    // patterns). PHP entry points and the page cache's own files never work without PHP, and
-    // Vite's dev server files point at your machine.
-    'exclude' => ['index.php', 'index-hook.php', '.htaccess', 'hot', 'fonts-manifest.dev.json', 'lynx-cache', 'web.config', '*.gitignore'],
+    // patterns). PHP entry points and the page cache's own files (with any folder a flush left)
+    // never work without PHP, and Vite's dev server files point at your machine.
+    'exclude' => ['index.php', 'index-hook.php', '.htaccess', 'hot', 'fonts-manifest.dev.json', 'lynx-cache', 'lynx-cache.trash-*', 'web.config', '*.gitignore'],
 
     // Old addresses of renamed and moved pages: a _redirects file (Netlify, Cloudflare Pages) and
     // a small HTML page at each old address that sends visitors on (any host, GitHub Pages too).
