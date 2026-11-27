@@ -5,6 +5,8 @@
 
 Exports a Lynx CMS site as static files: every published page in every language, the public files, a 404 page and redirects, to host without PHP.
 
+![The static export screen in the Lynx admin](screenshots/static-export.png)
+
 ## Installing
 
 ```bash
